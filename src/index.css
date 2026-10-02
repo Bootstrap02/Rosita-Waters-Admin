@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+:root {
+  --display: 'Bricolage Grotesque', system-ui, sans-serif;
+  --body: 'Figtree', system-ui, sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--body); color: #0C1330; background: #E8F1FB; min-height: 100vh; }
+h1, h2, h3 { font-family: var(--display); color: #14206B; letter-spacing: -0.02em; }
+img { max-width: 100%; display: block; }
+button { font: inherit; cursor: pointer; }
+input, select, textarea { font: inherit; padding: 11px 14px; border: 2px solid #D9E3F1; border-radius: 12px; width: 100%; background: #fff; color: #0C1330; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #14206B; }
+textarea { min-height: 90px; resize: vertical; }
+label { display: grid; gap: 6px; font-weight: 600; font-size: 0.92rem; color: #14206B; margin-bottom: 14px; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D9E3F1; border-radius: 99px; }

@@ -1,0 +1,36 @@
+==> It looks like we don't have access to your repo, but we'll try to clone it anyway.
+==> Cloning from https://github.com/Bootstrap02/Client-Backend
+==> Checking out commit 2226e09f1eabbee213f8c471aad84514548f0f07 in branch main
+==> Using Node.js version 24.21.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Running build command 'npm'...
+npm <command>
+Usage:
+npm install        install all the dependencies in your project
+npm install <foo>  add the <foo> dependency to your project
+npm test           run this project's tests
+npm run <foo>      run the script named <foo>
+npm <command> -h   quick help on <command>
+npm -l             display usage info for all commands
+npm help <term>    search for help on <term>
+npm help npm       more involved overview
+All commands:
+    access, adduser, approve-scripts, audit, bugs, cache, ci,
+    completion, config, dedupe, deny-scripts, deprecate, diff,
+    dist-tag, docs, doctor, edit, exec, explain, explore,
+    find-dupes, fund, get, help, help-search, init, install,
+    install-ci-test, install-scripts, install-test, link, ll,
+    login, logout, ls, org, outdated, owner, pack, ping, pkg,
+    prefix, profile, prune, publish, query, rebuild, repo,
+    restart, root, run, sbom, search, set, shrinkwrap, stage,
+    star, stars, start, stop, team, test, token, trust,
+    undeprecate, uninstall, unpublish, unstar, update, version,
+    view, whoami
+Specify configs in the ini-formatted file:
+    /opt/render/.npmrc
+or on the command line via: npm <command> --key=value
+More configuration info: npm help config
+Configuration fields: npm help 7 config
+npm@11.19.0 /usr/lib/node_modules/npm
+==> Build failed 😞
+==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
