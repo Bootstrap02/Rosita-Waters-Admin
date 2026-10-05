@@ -1,4 +1,5 @@
 
+
 import { useState, useEffect, useRef, createContext, useContext } from 'react';
 import { API_BASE_URL, apiRequest } from './api.js';
 
@@ -56,6 +57,7 @@ function StoreProvider({ children }) {
   const [page, setPage] = useState('products');
   const [apiLog, setApiLog] = useState([]);
   const [toast, setToast] = useState('');
+  const [toastType, setToastType] = useState('success');
   const [admin, setAdmin] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [dataLoading, setDataLoading] = useState(true);
@@ -64,10 +66,12 @@ function StoreProvider({ children }) {
 
   useEffect(() => () => clearTimeout(toastTimer.current), []);
 
-  const showToast = (text) => {
+  // type: 'success' (green) or 'error' (red). Errors stay on screen longer.
+  const showToast = (text, type = 'success') => {
+    setToastType(type);
     setToast(text);
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToast(''), 2200);
+    toastTimer.current = setTimeout(() => setToast(''), type === 'error' ? 6000 : 3500);
   };
 
   const log = (method, path, body) => {
@@ -160,14 +164,14 @@ function StoreProvider({ children }) {
       : [...previous, saved]);
     log(method, path, { ...draft, imageFile: undefined });
     setEditingId(null);
-    showToast(draft.id ? 'Product updated' : 'Product added');
+    showToast(draft.id ? 'Product updated successfully' : 'Product added successfully');
   };
 
   const deleteProduct = async (id) => {
     await apiRequest(`/api/products/${id}`, { method: 'DELETE' });
     setProducts((previous) => previous.filter((product) => product.id !== id));
     log('DELETE', `/api/products/${id}`);
-    showToast('Product deleted');
+    showToast('Product deleted successfully');
   };
 
   const updateOrderStatus = async (id, status) => {
@@ -177,14 +181,14 @@ function StoreProvider({ children }) {
     });
     setOrders((previous) => previous.map((entry) => (entry._id === id ? order : entry)));
     log('PUT', `/api/orders/${id}`, { status });
-    showToast('Order updated');
+    showToast('Order updated successfully');
   };
 
   const deleteOrder = async (id) => {
     await apiRequest(`/api/orders/${id}`, { method: 'DELETE' });
     setOrders((previous) => previous.filter((order) => order._id !== id));
     log('DELETE', `/api/orders/${id}`);
-    showToast('Order deleted');
+    showToast('Order deleted successfully');
   };
 
   const saveContent = async (section, data) => {
@@ -195,7 +199,7 @@ function StoreProvider({ children }) {
     const setters = { header: setHeader, home: setHome, about: setAbout, footer: setFooter };
     setters[section](data);
     log('PUT', `/api/content/${section}`, data);
-    showToast('Saved');
+    showToast('Changes saved successfully');
   };
 
   const saveSiteConfig = async (data) => {
@@ -205,7 +209,7 @@ function StoreProvider({ children }) {
     });
     setSiteConfig((previous) => ({ ...previous, ...saved }));
     log('PUT', '/api/tenant/admin-config', data);
-    showToast('Website settings saved');
+    showToast('Website settings saved successfully');
   };
 
   const uploadSiteImage = async (key, file) => {
@@ -214,7 +218,7 @@ function StoreProvider({ children }) {
     const saved = await apiRequest(`/api/tenant/admin-config/images/${key}`, { method: 'POST', body });
     setSiteConfig((previous) => ({ ...previous, ...saved }));
     log('POST', `/api/tenant/admin-config/images/${key}`);
-    showToast('Image uploaded');
+    showToast('Image uploaded successfully');
   };
 
   const logout = async () => {
@@ -236,7 +240,7 @@ function StoreProvider({ children }) {
   const value = {
     products, orders, header, setHeader, home, setHome, about, setAbout, footer, setFooter,
     siteConfig,
-    editingId, setEditingId, page, setPage, apiLog, toast, admin, setAdmin,
+    editingId, setEditingId, page, setPage, apiLog, toast, toastType, admin, setAdmin,
     authLoading, dataLoading, loadError, setLoadError, refreshData, logout, saveContent,
     saveProduct, deleteProduct, updateOrderStatus, deleteOrder, saveSiteConfig, uploadSiteImage, resetDemo, showToast, log,
   };
@@ -253,7 +257,7 @@ function useStore() {
 /* ---------- product form ---------- */
 
 function ProductForm({ editId, onSave, onCancel }) {
-  const { products, siteConfig } = useStore();
+  const { products, siteConfig, showToast } = useStore();
   const existing = products.find((p) => p.id === editId);
   const isNew = editId === 'new' || !existing;
 
@@ -288,6 +292,7 @@ function ProductForm({ editId, onSave, onCancel }) {
       await onSave({ ...form, imageFile, price: Number(form.price) });
     } catch (saveError) {
       setError(saveError.message);
+      showToast(`Product not saved: ${saveError.message}`, 'error');
     } finally {
       setSaving(false);
     }
@@ -377,6 +382,7 @@ function ContentForm({ section }) {
       await store.saveContent(section, form);
     } catch (saveError) {
       setError(saveError.message);
+      store.showToast(`Not saved: ${saveError.message}`, 'error');
     } finally {
       setSaving(false);
     }
@@ -495,6 +501,7 @@ function TenantSettingsPanel() {
       await store.uploadSiteImage(key, file);
     } catch (uploadError) {
       setError(uploadError.message);
+      store.showToast(`Upload failed: ${uploadError.message}`, 'error');
     } finally {
       setUploadingKey('');
     }
@@ -517,6 +524,7 @@ function TenantSettingsPanel() {
       });
     } catch (saveError) {
       setError(saveError.message);
+      store.showToast(`Not saved: ${saveError.message}`, 'error');
     } finally {
       setSaving(false);
     }
@@ -649,7 +657,7 @@ function ProductsPanel() {
                       className="btn-ghost"
                       onClick={() => {
                         if (window.confirm('Delete this product? This cannot be undone.')) {
-                          store.deleteProduct(p.id).catch((error) => store.showToast(error.message));
+                          store.deleteProduct(p.id).catch((error) => store.showToast(error.message, 'error'));
                         }
                       }}
                     >
@@ -711,7 +719,7 @@ function OrdersPanel() {
                         try {
                           await store.updateOrderStatus(order._id, event.target.value);
                         } catch (error) {
-                          store.showToast(error.message);
+                          store.showToast(error.message, 'error');
                         } finally {
                           setUpdatingId(null);
                         }
@@ -727,7 +735,7 @@ function OrdersPanel() {
                       className="btn-ghost"
                       onClick={() => {
                         if (window.confirm(`Delete order ${order.ref}? This cannot be undone.`)) {
-                          store.deleteOrder(order._id).catch((error) => store.showToast(error.message));
+                          store.deleteOrder(order._id).catch((error) => store.showToast(error.message, 'error'));
                         }
                       }}
                     >
@@ -817,7 +825,7 @@ const NAV = [
 ];
 
 function AdminShell() {
-  const { page, setPage, toast, admin, logout, showToast, loadError, dataLoading, refreshData } = useStore();
+  const { page, setPage, toast, toastType, admin, logout, showToast, loadError, dataLoading, refreshData } = useStore();
 
   if (dataLoading) {
     return <div className="auth-shell"><div className="auth-card">Connecting to the client API…</div></div>;
@@ -862,7 +870,7 @@ function AdminShell() {
         </div>
         <div className="account">
           <span className="badge">{admin?.email}</span>
-          <button className="btn btn-line btn-sm" onClick={() => logout().catch((error) => showToast(error.message))}>Sign out</button>
+          <button className="btn btn-line btn-sm" onClick={() => logout().catch((error) => showToast(error.message, 'error'))}>Sign out</button>
         </div>
       </div>
 
@@ -888,7 +896,7 @@ function AdminShell() {
         <main>{content}</main>
       </div>
 
-      <div className={'toast' + (toast ? ' on' : '')} role="status" aria-live="polite">{toast}</div>
+      <div className={'toast' + (toast ? ' on' : '') + (toastType === 'error' ? ' error' : '')} role="status" aria-live="polite">{toast}</div>
     </>
   );
 }
