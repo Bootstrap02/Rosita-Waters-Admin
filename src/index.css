@@ -1,3 +1,4 @@
+
 @import "tailwindcss";
 
 :root {
@@ -6,6 +7,7 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { max-width: 100%; overflow-x: hidden; }
 body { font-family: var(--body); color: #0C1330; background: #E8F1FB; min-height: 100vh; }
 h1, h2, h3 { font-family: var(--display); color: #14206B; letter-spacing: -0.02em; }
 img { max-width: 100%; display: block; }
